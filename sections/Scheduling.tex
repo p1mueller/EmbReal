@@ -97,12 +97,33 @@ The idea is important ISR/tasks are executed fast.
   \item Important task has highest priority
 \end{itemize}
 
-\subsection{Blended Approach}
+\subsubsection{Blended Approach}
 Combination of RMA and ICH
 \begin{itemize}
   \item Short task high priority
   \item Important ISR has high priority
 \end{itemize}
+
+\subsection{Race condition/Starvation/Deadlock}
+\begin{description}
+  \item[Race Condition]  The result of an operation depends on the timing behaviour of a specific operation.
+  \item[Starvation]      Is a condition where a process never gets to it (it starves).
+        The fairness condition states that starvation must be prevented.
+  \item[Deadlock]        Is a situation where two processes block each other.
+        A deadlock can be avoided by having all processes request the shared resources always in the same order.
+\end{description}
+
+\subsubsection{Prevent Race Conditions}
+\begin{description}
+  \item[Critical Sections] Define sections in which ISR(s) are blocked.
+        Pro: Simple, possible on any MCU.
+        Cons: Acts blocking.
+  \item[Atomic Operations] Command disables ISR for one instruction cycle.
+        Atomic commands can not be split in instruction cycles that can be interrupted.
+        Atomic by CPU architecture see RISC-V RV32A Atomic Extension.
+        Atomic by programming language.
+        \textbf{Atomic operation} is a \textbf{foundation} for all other solutions of OS and RTOS.
+\end{description}
 
 \subsection{Scheduling Algorithms}
 
@@ -122,7 +143,6 @@ Combination of RMA and ICH
   \switchcolumn
   \lstinputlisting[style=C]{snippets/Schedule_Algorithms/sequential_continuos_exec.c}
 \end{paracol}
-
 
 \subsubsection{Round Robin without ISR}
 \begin{paracol}{2}
@@ -148,6 +168,24 @@ The ISRs give the system more dynamic, less blocking behaviour and smoother stat
   \lstinputlisting[style=C, firstline=11]{snippets/Schedule_Algorithms/round_robin_isr.c}
 \end{paracol}
 \input{images/Schedule/flow_rr_isr}
+
+\subsubsection{Cooperative task execution round robin with ISR with one time base}
+Cooperative task/flow execution: Every flow runs as long as it has code to execute. When the flow is done
+it returns to the schedule algorithm. The schedule algorithm start next flow/task.
+The ISRs give the system more dynamic, less blocking behaviour and smoother state machines.
+This works fine as long as the flows are none blocking and don’t last too long…
+Cooperative task execution round robin with ISR: are very common on small microcontrollers
+\columnratio{0.5}
+\begin{paracol}{2}
+  \lstinputlisting[style=C, lastline=6]{snippets/Schedule_Algorithms/round_robin_isr_time.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=8, lastline=14]{snippets/Schedule_Algorithms/round_robin_isr_time.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=16, lastline=22]{snippets/Schedule_Algorithms/round_robin_isr_time.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=24]{snippets/Schedule_Algorithms/round_robin_isr_time.c}
+\end{paracol}
+\input{images/Schedule/flow_rr_isr_time}
 
 \subsubsection{Nonpreemptive FIFO Queue with ISR}
 Cooperative task/flow execution: Every flow runs as long as it has code to execute. When the flow is
@@ -199,8 +237,28 @@ The ISRs give the system more dynamic, less blocking behaviour and smoother stat
 Flow A start a process.
 The priority is defined by the deadline of the flows
 
-\subsubsection{}
-% TODO
+\subsubsection{Priority based preemptive Task Execution with ISR}
+Flows are defined are implemented as tasks an priorities are defined for them.
+The scheduler starts tasks if they have the highest priority and they are requested to run.
+If a low priority task is running and a higher priority task is requested to run, then it can preempt the lower prioritised task, this gives the system more dynamic.
+The ISRs are running as foreground process and give the system more dynamic.\\
+\input{images/Schedule/preemptive_prio}\\
+Flows are implemented as RTOS tasks with states and priorities.
+The schedule decides which tasks is next.
+The dispatcher starts the tasks in the system tick intervall.
+The RTOS is interrupted by ISRs.
+
+\subsubsection{Priority based preemptive Task Execution and Timeslicing for Tasks same Priority, with ISR}
+Flows are defined are implemented as tasks an priorities are defined for them.
+The scheduler starts tasks if they have the highest priority and they are requested to run.
+If a low priority task is running and a higher priority task is requested to run, then it can pre-empt the lower prioritised task, this gives the system more dynamic.
+However Tasks with the same priority are running in cooperative scheduling.
+The ISRs are running as foreground process and give the system more dynamic.\\
+\input{images/Schedule/preemptive_prio_timeslicing.tex}\\
+Flows are implemented as RTOS tasks with states and priorities.
+The schedule decides which tasks is next.
+The dispatcher starts the tasks in the system tick intervall.
+The RTOS is interrupted by ISRs.
 
 \clearpage
 \begin{sidewaystable}
@@ -213,5 +271,18 @@ The priority is defined by the deadline of the flows
     Preemption         & none           & ISR preempts flows       & ISR preempts flows       & ISR preempts flows               & ISR preempts flows               \\
     Deterministic      & by flow design & sum of WCET and ISR WCET & sum of WCET and ISR WCET & sum of WCET and ISR WCET         & sum of WCET and ISR WCET         \\
     Occurence          & seldom         & often                    & seldom                   & often, prelimniary stage of RTOS & often, preliminary stage of RTOs \\\hline
+  \end{tabularx}
+\end{sidewaystable}
+
+\begin{sidewaystable}
+  \begin{tabularx}{\textwidth}{l X X}
+    \hline
+    Property           & Priority Preemptive                                    & Priority Preemptive Timeslicing                        \\\hline
+    Schedule algorithm & high                                                   & high                                                   \\
+    Priority of flows  & different, fixed or dynamic                            & different, fixed or dynamic                            \\
+    Priority of ISR    & different, static, high                                & different, static, high                                \\
+    Preemption         & ISR preempts RTOS, RTOS tasks preempt other RTOS tasks & ISR preempts RTOS, RTOS tasks preempt other RTOS tasks \\
+    Deterministic      & by flow design                                         & by flow design                                         \\
+    Occurence          & often, if knowledge and MCU ressources are available   & often, if knowledge and MCU ressources are available   \\\hline
   \end{tabularx}
 \end{sidewaystable}

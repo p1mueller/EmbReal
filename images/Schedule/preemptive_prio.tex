@@ -1,0 +1,69 @@
+\begin{tikzpicture}[auto, node distance=0.1cm, >=latex', font=\tiny,
+        block/.style={fill=black!20, draw=black, thick, rectangle, text width=1.1cm, minimum height=0.5cm, align=center}]
+    \coordinate (O) at (0, 0);
+    \coordinate (S) at ($(O) + (0.1, 0.8)$);
+
+    \draw[->] (O) -- node[pos=1.0, anchor=north east]{time} ++(14.2, 0);
+    \draw[->] (O) -- node[pos=1.0, anchor=north west]{flow/task priority} ++(0, 5.2);
+    \foreach \y in {0, ..., 4}{
+            \draw[densely dotted] (S) ++(-0.1, \y) -- ++(14.2, 0);
+        }
+    \foreach \n [count=\y] in {A, B, C}{
+            \node[block, anchor=east] at ($(S) + (-0.2, 3-\y)$){Flow \n\linebreak Priority};
+        }
+    \draw [decorate,decoration={brace,amplitude=10pt},xshift=4pt,yshift=0pt] (S) ++ (14.2, 4.2) -- ++(0, -1.4) node [black,midway,xshift=15pt,rotate=90,anchor=center] {ISR priorities};
+    \draw [decorate,decoration={brace,amplitude=10pt},xshift=4pt,yshift=0pt] (S) ++ (14.2, 2.2) -- ++(0, -2.4) node [black,midway,xshift=15pt,rotate=90,anchor=center] {Task priorities};
+
+    \node[block, anchor=west](a1) at ($(S) + (0, 2)$) {Running};
+    \node[block, right=0cm of a1](a2){Waiting};
+    \node[block, right=0cm of a2](a3){Running};
+    \node[block, right=0cm of a3](a4){Running};
+    \node[block, right=0cm of a4](a5){Not Created};
+
+    \node[block, anchor=west](b1) at ($(S) + (0, 1)$) {Ready};
+    \node[block, right=0cm of b1](b2){Running};
+    \node[block, right=0cm of b2](b3){Ready};
+    \node[block, right=0cm of b3](b4){Ready};
+    \node[block, right=0cm of b4](b5){Waiting};
+
+    \node[block, anchor=west](c1) at (S) {Waiting};
+    \node[block, right=0cm of c1](c2){Ready};
+    \node[block, right=0cm of c2](c3){Ready};
+    \node[block, right=0cm of c3](c4){Ready};
+    \node[block, right=0cm of c4](c5){Running};
+
+    \node[block, above right=1.0cm and 0.0cm of a5.east, anchor=west](isra){ISR A\linebreak Running};
+
+    \node[block, below right=1.0cm and 0.0cm of isra.east, anchor=west](a6){Not Created};
+    \node[block, right=0cm of a6, text width=0.405cm](a7){Not Created};
+
+    \node[block, below=1cm of a6.west, anchor=west](b6){Waiting};
+    \node[block, right=0cm of b6, text width=0.405cm](b7){Waiting};
+
+    \node[block, below=1cm of b6.west, anchor=west](c6){Running};
+    \node[block, right=0cm of c6, text width=0.405cm](c7){Running};
+
+    \node[block, above right=2.0cm and 0.0cm of a7.east, anchor=west](isrd){ISR D\linebreak Running};
+
+    \node[block, below right=2.0cm and 0.0cm of isrd.east, anchor=west, text width=0.41cm](a8){Not Created};
+    \node[block, right=0cm of a8](a9){Not Created};
+
+    \node[block, below=1cm of a8.west, anchor=west, text width=0.41cm](b8){Waiting};
+    \node[block, right=0cm of b8](b9){Waiting};
+
+    \node[block, below=1cm of b8.west, anchor=west, text width=0.41cm](c8){Running};
+    \node[block, right=0cm of c8](c9){Running};
+
+    \foreach \i in {0, ..., 9}{
+            \draw[->] (O) ++ (0.1cm, 0) ++ (\i*1.385cm, 0.2cm) -- ++(1.385cm, 0cm);
+        }
+    % \node[block, below right=1.0cm and 0.1cm of b1.east, anchor=west](b2) {\textbf{Flow B}\linebreak Running};
+    % \node[block, above right=2.0cm and 0.1cm of b2.east, anchor=west](b3) {\textbf{ISR A}\linebreak Running};
+    % \node[block, below right=3.0cm and 0.1cm of b3.east, anchor=west](b4) {\textbf{Flow C}\linebreak Running};
+    % \node[block, right=of b4](b5) {\textbf{Flow D}\linebreak Running};
+    % \node[block, above right=2.0cm and 0.1cm of b5.east, anchor=west](b6) {\textbf{Flow A}\linebreak Running};
+    % \node[block, below right=2.0cm and 0.1cm of b6.east, anchor=west](b7) {\textbf{Flow E}\linebreak Running};
+    % \node[block, above right=4.0cm and 0.1cm of b7.east, anchor=west](b8) {\textbf{ISR D}\linebreak Running};
+    % \node[block, below right=3.0cm and 0.1cm of b8.east, anchor=west](b9) {\textbf{Flow B}\linebreak Running};
+    % \node[below right=1.0cm and 0.1cm of b9.east, anchor=north west](end) {\normalsize \ldots};
+\end{tikzpicture}
