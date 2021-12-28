@@ -1,0 +1,19 @@
+\begin{tikzpicture}[auto, node distance=0.1cm, >=latex', font=\tiny,
+        block/.style={fill=black!20, draw=black, thick, rectangle, text width=1.0cm, minimum height=0.8cm, align=center}]
+    \coordinate (O) at (0, 0);
+    \coordinate (S) at ($(O) + (0.1, 0.6)$);
+
+    \draw[->] (O) -- node[pos=1.0, anchor=north east]{time} ++(11, 0);
+    \draw[->] (O) -- node[pos=1.0, anchor=north west]{flow/task priority} ++(0, 1.6);
+    \draw[densely dotted] (S) ++(-0.1, 0) -- ++(11, 0);
+
+    \node[block, anchor=west](b1) at (S) {\textbf{Flow A}\linebreak Running};
+    \node[block, right=of b1](b2) {\textbf{Flow B}\linebreak Running};
+    \node[block, right=of b2](b3) {\textbf{Flow C}\linebreak Running};
+    \node[block, right=of b3](b4) {\textbf{Flow D}\linebreak Running};
+    \node[block, right=of b4](b5) {\textbf{Flow E}\linebreak Running};
+    \node[block, right=of b5](b6) {\textbf{Flow A}\linebreak Running};
+    \node[block, right=of b6](b7) {\textbf{Flow B}\linebreak Running};
+    \node[right=of b7, anchor=north west](b8) {\normalsize \ldots};
+
+\end{tikzpicture}

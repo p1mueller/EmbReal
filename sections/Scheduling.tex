@@ -1,0 +1,217 @@
+%!TEX root = EmbSW1
+\section{Scheduling}
+
+\subsection{Tasks in an Embedded System}
+The term \glqq task\grqq is a design-time concept.
+A real-time system typically has multiple tasks, each of which represents a unit of concurrency.
+In general, a task is simply a block of instructions (or actions) to be executed by a processor for a specific purpose.
+A task with real-time constraints is called a real-time task.
+
+\subsubsection{Categories}
+Most task can be characterized into three categories:
+\begin{itemize}
+  \item Periodic tasks: A periodic task is a stream of jobs, where the interarrival times between consecutive jobs are almost the same
+  \item A sporadic task: A sporadic task is executed in response to events which occur at random instants of time, and the randomness is hard to be characterized by simple probability distribution functions.
+  \item Aperiodic tasks: An aperiodic task is a stream of jobs, where the interarrival times between consecutive jobs may follow a known probability distribution function.
+\end{itemize}
+A system can be a blend of task of different categories. The categories can help to define the appropriate schedule algorithm.
+
+\subsection{Schedulability}
+\begin{itemize}
+  \item A set of tasks is schedulable if all tasks can meet their \textbf{deadlines} at all times.
+  \item \textbf{deadline:}
+        \begin{itemize}
+          \item latest possible completion time
+          \item for periodic tasks this is usually at the same time as the start of the next period
+        \end{itemize}
+\end{itemize}
+
+\subsection{Multitasking}
+\begin{itemize}
+  \item Basic problem:
+        \begin{itemize}
+          \item How are shared resources best allocated?
+          \item Different strategies can be used for allocation.
+          \item The \textbf{scheduler} makes this allocation.
+          \item In the following considerations we assume the allocation of the resource \textbf{CPU}.
+        \end{itemize}
+\end{itemize}
+
+\subsection{Cooperative Multitasking}
+\begin{itemize}
+  \item In closed systems, allocation may well be cooperative
+  \item Active task decides for itself when to free the processor for other tasks.
+  \item An unfair task blocks the others (also a crashed active task)
+  \item Select next task via: FCFS, Round Robin, random, priorities, etc.
+  \item Very easy to implement
+\end{itemize}
+
+\subsubsection{Performance}
+\begin{itemize}
+  \item Throughput: number of tasks completed per time unit
+  \item Utilization: Percentage utilization of a resource.
+  \item Average waiting time
+  \item more\ldots
+\end{itemize}
+
+\subsection{Purpose of Real-Time Scheduling}
+\begin{itemize}
+  \item All critical time constraints (deadlines, response time) should be met.
+  \item In case of emergency the scheduling algorithm has to decide to keep the most critical tasks.
+  \item Deadlines of \textbf{less} critical tasks may have to be \textbf{violated}.
+\end{itemize}
+
+\subsection{Execution Times}
+Scheduling of tasks requires knowledge about the duration of task executions, especially if meeting time constraints has to be guaranteed, as in real-time systems.
+
+\subsubsection[Worst Case Execution Time]{Worst Cate Execution Time (WCET)}
+The WCET is the basis for most scheduling algorithms.
+The worst case execution time (WCET) is the largest execution time of a program for any input and any initial execution state.
+
+\subsubsection[Best Case Execution Time]{Best Case Execution Time (BCET)}
+In contrast there is BCET is the smallest execution time of a program, considering all feasible inputs and initial states.
+The BCET is a safe and tight lower bound on the execution time.
+
+\subsection{Scheduler}
+A scheduler is a resource broker that is responsible for allocating execution engine resources.
+This means it plans the flow/task.
+This can be done
+\begin{itemize}
+  \item statically (fix in programm)
+  \item dynamically (changing priority based on rules)
+\end{itemize}
+
+\subsection{Approaches to define static Priorities for Tasks}
+\subsubsection{Rate-Monotonic Approach: Short Code High priority}
+The idea is that short ISR/tasks are executed fast.
+Therefore, they block fo a very short time and execution is more guaranteed by priority.
+\begin{itemize}
+  \item Shortest ISR has highest priority
+  \item Shortest flow/task has highest priority
+\end{itemize}
+
+\subsubsection{Important Code High Priority}
+The idea is important ISR/tasks are executed fast.
+\begin{itemize}
+  \item Important ISR has highest priority
+  \item Important task has highest priority
+\end{itemize}
+
+\subsection{Blended Approach}
+Combination of RMA and ICH
+\begin{itemize}
+  \item Short task high priority
+  \item Important ISR has high priority
+\end{itemize}
+
+\subsection{Scheduling Algorithms}
+
+\subsubsection{Sequential One Time Execution}
+\columnratio{0.6}
+\begin{paracol}{2}
+  It is the simplest situation.
+  The flow is executed once and is restarted by resetting the system.
+  Not really found in real applications.
+  \switchcolumn
+  \lstinputlisting[style=C]{snippets/Schedule_Algorithms/sequential_one_time_exec.c}
+\end{paracol}
+\subsubsection{Sequential Continuos Execution}
+\begin{paracol}{2}
+  The flow is executed infinetely and is restarted by resetting the system.\\
+  Typical whem beginning coding. Used for applications which are not really demanding (close to round robin).
+  \switchcolumn
+  \lstinputlisting[style=C]{snippets/Schedule_Algorithms/sequential_continuos_exec.c}
+\end{paracol}
+
+
+\subsubsection{Round Robin without ISR}
+\begin{paracol}{2}
+  Cooperative task/flow execution: Every flow runs as long as it has code to execute.
+  When the flow is done it returns to the schedule algorithm.
+  The schedule algorithm start next flow/task.\\
+  This works fine as long as the flows are none blocking and don’t last too long.
+  This leads typical to state machines!\\
+  \input{images/Schedule/flow_rr_no_isr}$ $\\
+  \switchcolumn
+  \lstinputlisting[style=C]{snippets/Schedule_Algorithms/round_robin_no_isr.c}
+\end{paracol}
+
+\subsubsection{Round Robin with ISR}
+Cooperative task/flow execution: Every flow runs as long as it has code to execute.
+When the flow is done it returns to the schedule algorithm.
+The schedule algorithm starts next flow/task in queue.
+The ISRs give the system more dynamic, less blocking behaviour and smoother state machines.
+\columnratio{0.5}
+\begin{paracol}{2}
+  \lstinputlisting[style=C, lastline=9]{snippets/Schedule_Algorithms/round_robin_isr.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=11]{snippets/Schedule_Algorithms/round_robin_isr.c}
+\end{paracol}
+\input{images/Schedule/flow_rr_isr}
+
+\subsubsection{Nonpreemptive FIFO Queue with ISR}
+Cooperative task/flow execution: Every flow runs as long as it has code to execute. When the flow is
+done it returns to the schedule algorithm. The schedule algorithm starts next flow/task in queue.
+The ISRs give the system more dynamic, less blocking behaviour and smoother state machines.
+\columnratio{0.26, 0.32}
+\begin{paracol}{3}
+  \lstinputlisting[style=C, lastline=7]{snippets/Schedule_Algorithms/nonpreempt_fifo_queue.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=9, lastline=15]{snippets/Schedule_Algorithms/nonpreempt_fifo_queue.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=17]{snippets/Schedule_Algorithms/nonpreempt_fifo_queue.c}
+\end{paracol}
+\input{images/Schedule/nonpreempt_fifo_queue}\\
+Flow A start a process.
+The ISR injects the execution of flow A into Queue.
+
+\subsubsection{Nonpreemptive Priority Queue with ISR}
+Cooperative task/flow execution: Every flow runs as long as it has code to execute.
+When the flow is done it returns to the schedule algorithm.
+The schedule algorithm starts next highest prioritised flow/task.
+The ISRs give the system more dynamic, less blocking behaviour and smoother state machines.
+\columnratio{0.245, 0.38}
+\begin{paracol}{3}
+  \lstinputlisting[style=C, lastline=5]{snippets/Schedule_Algorithms/nonpreempt_prio_queue.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=7, lastline=13]{snippets/Schedule_Algorithms/nonpreempt_prio_queue.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=15]{snippets/Schedule_Algorithms/nonpreempt_prio_queue.c}
+\end{paracol}
+\input{images/Schedule/nonpreempt_prio_queue}\\
+Flow A start a process.
+The ISR injects the execution of flow A by setting flag.
+
+\subsubsection{Nonpreemptive Queue: Earliest Deadline First, with ISR}
+Cooperative task/flow execution: Every flow runs as long as it has code to execute.
+When the flow is done it returns to the schedule algorithm.
+The schedule algorithm starts next flow with earliest deadline.
+The ISRs give the system more dynamic, less blocking behaviour and smoother state machines.
+\columnratio{0.21, 0.4}
+\begin{paracol}{3}
+  \lstinputlisting[style=C, lastline=5]{snippets/Schedule_Algorithms/early_first.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=7, lastline=16]{snippets/Schedule_Algorithms/early_first.c}
+  \switchcolumn
+  \lstinputlisting[style=C, firstline=17]{snippets/Schedule_Algorithms/early_first.c}
+\end{paracol}
+\input{images/Schedule/early_first}\\
+Flow A start a process.
+The priority is defined by the deadline of the flows
+
+\subsubsection{}
+% TODO
+
+\clearpage
+\begin{sidewaystable}
+  \begin{tabularx}{\textwidth}{l X X X X X}
+    \hline
+    Property           & RR no ISR      & RR ISR                   & NE FIFO                  & NE Prio                          & Early First                      \\\hline
+    Schedule algorithm & simple         & simple                   & medium                   & medium                           & medium to high                   \\
+    Priority of flows  & all the same   & all the same             & all the same, dynamic    & different, static                & different,dynamic                \\
+    Priority of ISR    & none           & different, static, high  & different, static, high  & different, high, static          & different, high, static          \\
+    Preemption         & none           & ISR preempts flows       & ISR preempts flows       & ISR preempts flows               & ISR preempts flows               \\
+    Deterministic      & by flow design & sum of WCET and ISR WCET & sum of WCET and ISR WCET & sum of WCET and ISR WCET         & sum of WCET and ISR WCET         \\
+    Occurence          & seldom         & often                    & seldom                   & often, prelimniary stage of RTOS & often, preliminary stage of RTOs \\\hline
+  \end{tabularx}
+\end{sidewaystable}

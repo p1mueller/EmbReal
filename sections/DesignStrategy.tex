@@ -1,0 +1,42 @@
+\section[Design Strategy]{Design Strategy on Embedded (Real-time) Software}
+\subsection{Targets}
+\begin{itemize}
+	\item Design should be solution independent for as long as it makes sense (not as long as possible).
+	\item Encourage system design, rather than separate designs for mechanics, electronics, firmware, software, etc., which may be conflicting
+	\item System specification is ideally done using a unique specification language, not in prose
+	\item The specification can be simulated (executed)
+	\item Implementations can be easily changed, e.g. from HW to SW or vice versa.
+\end{itemize}
+
+\subsection{Requirements for Practical Application}
+\begin{itemize}
+	\item Methods and tools should not be too technical in system design, i.e. methods should be applicable for electronics, firmware and if possible also mechanics developers
+	\item If possible good tool support and automatic synthesis
+\end{itemize}
+
+\subsection{Specification Languages}
+\begin{itemize}
+	\item Formal languages are unique
+	\item Examples of specification languages: SystemC, SysML, SpecC, SystemVerilog, Esterel, Matlab/Simulink, Statecharts.
+	\item The specification can be compiled and executed
+	\item Simulations of the system on a powerful system (e.g. PC) are mostly supported
+	\item The executable specification serves as golden reference for future development steps
+\end{itemize}
+
+\subsection{Approach}
+Approach in a real time embedded design for task and scheduling topics
+\begin{enumerate}
+	\item Analysis of requirements and split work up into tasks
+	\item The system and task model
+	\item The scheduling algorithm with related schedule ability test.
+	      Implement every flow and measure WCET.
+	\item Theoretical and/or empirical performance evaluation of the scheduling algorithm and/or the schedule ability test
+\end{enumerate}
+
+\subsubsection{Split Work up into Tasks}
+Get the system's timing constraints from \ldots
+\begin{itemize}[label=\ldots]
+	\item the physics of the system and their implications
+	\item the application
+\end{itemize}
+Data flow charts help to split ub data paths into tasks.

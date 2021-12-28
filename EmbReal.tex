@@ -1,0 +1,57 @@
+\documentclass[titlepage=true]{scrartcl}
+
+\input{header/zusammenfassung}
+% \input{header/hyperref}
+
+\input{header/listings}
+\input{header/tikz}
+\usepackage{textgreek}
+\usepackage{paracol}
+\usetikzlibrary{positioning}
+\setDefaultArrayStretch{1.8}
+
+\makeatletter
+
+% Newline after a paragraph
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+	{-3.25ex\@plus -1ex \@minus -.2ex}%
+	{1.5ex \@plus .2ex}%
+	{\normalfont\normalsize\bfseries}}
+\makeatother
+
+\title{Embedded Real-Time Software}
+\author{\input{Contributors}}
+\begin{document}
+\begin{titlepage}
+	\thispagestyle{empty}
+	\maketitle
+\end{titlepage}
+
+
+\lstset{style=C}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{5}
+\tableofcontents \newpage
+
+\include{sections/EmbeddedRTSystems}
+\include{sections/Concurrency}
+\include{sections/DesignStrategy}
+\include{sections/Scheduling}
+% \include{sections/Modellierung}
+% \include{sections/FSM}
+% \include{sections/FSM_Realisierung}
+% \include{sections/Modularisierung}
+% \include{sections/EventBasedSystems}
+% \include{sections/Computerarithmetik}
+% \include{sections/Plattformen}
+% \include{sections/Multicore}
+% \include{sections/Styleguide}
+% \include{sections/HAL}
+% \include{sections/Eigene_Notizen}
+
+
+%\include{sections/Patterns}
+%\include{sections/Bootstrap}
+
+
+\end{document}

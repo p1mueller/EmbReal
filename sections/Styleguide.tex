@@ -1,0 +1,122 @@
+\section{Style guide und Language Linkage}
+\subsection{Style guide}
+\begin{itemize}
+	\item Programme werden für Programmierer geschrieben, nicht für Compiler
+	\item Programmierkonventionen erleichtern einen konsistenten Stil, der auch von anderen verstanden wird
+	\item Unwichtiges nicht überbewerten
+	\item Alles, was der Compiler entdeckt und mit Warnings meldet (z.B. nicht initialisierte Variablen) muss nicht explizit in den Codierrichtlinien erwähnt werden
+	\item Seien Sie konsistent und konsequent!
+\end{itemize}
+
+\subsubsection{Namenskonventionen}
+\begin{itemize}
+	\item Wenige Underscores (\_) verwenden
+	\item Keine Namen mit Underscore (\_) beginnen
+	\item Zusammengesetzte Namen mit \lstinline{camelCase} betonen, nicht \lstinline{camel_case}
+	\item Präfixe bei Variablen sehr zurückhaltend einsetzen oder ganz vermeiden (z.B. \lstinline{i_myVariable} für Integer)
+	\item Selbstdefinierte Typen und Klassen mit Grossbuchstaben beginnen
+	\item Funktionen und Methoden mit Kleinbuchstaben beginnen
+	\item Variablen und Objekte mit Kleinbuchstaben beginnen
+	\item Makros (\lstinline{#define}) ausschliesslich mit Grossbuchstaben definieren, Trennung falls notwendig mit Underscores, z.B. \lstinline{MY_UGLY_MACRO}
+\end{itemize}
+
+\subsubsection{Typen mit genauer Breite}
+\begin{itemize}
+	\item Ab C99 werden im Headerfile \lstinline{<stdint.h>} verschiedene Typen mit genauer Breite definiert. Wenn solche Typen benötigt werden, sollen genau diese Namen verwendet werden oder sind allenfalls mittels \lstinline{typedef} zu definieren.
+	\item Die Konventionen lauten wie folgt:
+	\begin{itemize}
+		\item \lstinline{intN_t}, wobei N = 8, 16, 32 für \lstinline{signed int}-Typen \\
+		Beispiele: \lstinline{int8_t}, \lstinline{int16_t}, \lstinline{int32_t}
+		\item \lstinline{uintN_t}, wobei N = 8, 16, 32 für \lstinline{unsigned int}-Typen \\
+		Beispiele: \lstinline{uint8_t}, \lstinline{uint16_t}, \lstinline{uint32_t}
+	\end{itemize}
+\end{itemize}
+
+\subsection{Language Linkage}
+\subsubsection{Plain Old Data Types (POD Types)}
+\begin{itemize}
+	\item Datentypen, die bereits in C vorhanden sind, werden als POD Types bezeichnet
+	\item Dazu gehören \lstinline{char}, \lstinline{short}, \lstinline{int}, \lstinline{long}, jeweils \lstinline{signed} und \lstinline{unsigned}, \lstinline{float} und \lstinline{double}
+	\item POD types funktionieren in C++ identisch zu C
+\end{itemize}
+
+\subsubsection{Name Mangling}
+\begin{multicols}{2}
+	Beim Übersetzen in Assembler müssen eindeutige Labels entstehen. In C ist dies kein Problem, da die Funktionsnamen bereits eindeutig sind. Hingegen ist dies in C++ ist nicht der Fall. Deshalb weist der Compiler den Funktionen einen eindeutigen Namen zu (dieser Prozess wird als Mangling bezeichnet).
+\columnbreak
+  \begin{tabular}{|l|lll|}
+  \hline
+    C   & {\lstinline!foo()!} & $\rightarrow$ & \_foo \\
+  \hline
+    C++ & {\lstinline!foo(int)!} & $\rightarrow$ & \_foo\_i \\
+        & {\lstinline!foo(double, int)!} & $\rightarrow$ & \_foo\_d\_i \\
+        & {\lstinline!MyClass::foo(int)!} & $\rightarrow$ & \_MyClass\_foo\_i \\
+  \hline
+  \end{tabular}
+\end{multicols}
+
+\subsubsection{Einbinden von C-Bibliotheken unter C++}
+Wird in C++ eine Funktion \lstinline{foo(int)} aufgerufen welche in einer compilierten C-Library vorliegt, sucht der Compiler nach einer Funktion \_foo\_i. Diese existiert aber nicht da sie \_foo heisst. Deshalb muss dem Compiler mitgeteilt werden, dass es sich um eine C-Funktion handelt.\\
+
+\begin{lstlisting}[style=Cpp]
+extern "C" void foo(int);    \\ use C language linkage
+extern void goo(int);        \\ use C++ language linkage
+void hoo(int);               \\ use C++ language linkage
+extern "C++" void koo(int);  \\ use C++ language linkage
+
+//optimale Anwendung von extern "C" (koennen in C und C++ Dateien included werden)
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+// list multiple prototypes with C linkage, or
+// #include C header file(s)
+#ifdef __cplusplus
+}
+#endif
+\end{lstlisting}
+
+\subsubsection{C++-Code aus C aufrufen}
+\begin{itemize}
+	\item C kennt keine Klassen und kennt den this-Pointer nicht
+	\item Aus C können keine C++-Elementfunktionen direkt aufgerufen werden
+	\item Lösung: C Wrapper Funktionen für C zur Verfügung stellen
+	\item Ein Client ruft die Funktion \lstinline{void Philosopher::live()} auf
+	\begin{itemize}
+		\item Diese Funktion soll im Hintergrund einen eigenen Thread starten
+	\end{itemize}
+	\item Die Threadfunktion \lstinline{void Philosopher::lifeThread()} soll eine Elementfunktion der Klasse sein
+	\begin{itemize}
+		\item Dadurch hat diese Funktion alle Vorteile einer Elementfunktion, z.B. Zugriff auf alle Klassenelemente
+		\item Sie kann nun in C++ programmiert werden
+	\end{itemize}
+	\item Gestartet wird der Thread mit der C-Funktion \lstinline{pthread_create()}
+\end{itemize}
+\begin{lstlisting}{style=cpp}
+class Philosopher
+{
+  public:
+    // ...
+    void live();        // the philosopher's life
+  private:
+    // the classes attributes
+    pthread_attr_t attr;
+    pthread_t tid;     // thread id
+    // ...
+    void lifeThread();	// the (C++)-thread function
+    static void* staticWrapper(void* p) // C Wrapper for pthread_create()
+                                        // p must be the this pointer
+    {
+      static_cast<Philosopher*>(p)->lifeThread();
+      return 0;
+    }
+};
+\end{lstlisting}
+\begin{lstlisting}{style=cpp}
+void Philosopher::live()
+{
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  pthread_create(&tid, &attr, staticWrapper, this);
+}
+\end{lstlisting}

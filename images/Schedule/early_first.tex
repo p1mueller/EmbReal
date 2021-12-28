@@ -1,0 +1,23 @@
+\begin{tikzpicture}[auto, node distance=0.1cm, >=latex', font=\tiny,
+        block/.style={fill=black!20, draw=black, thick, rectangle, text width=1.0cm, minimum height=0.8cm, align=center}]
+    \coordinate (O) at (0, 0);
+    \coordinate (S) at ($(O) + (0.1, 0.6)$);
+
+    \draw[->] (O) -- node[pos=1.0, anchor=north east]{time} ++(13, 0);
+    \draw[->] (O) -- node[pos=1.0, anchor=north west]{flow/task priority} ++(0, 3.2);
+    \foreach \y in {0, ..., 2}{
+            \draw[densely dotted] (S) ++(-0.1, \y) -- ++(13, 0);
+        }
+    \draw [decorate,decoration={brace,amplitude=10pt},xshift=4pt,yshift=0pt] (S) ++ (13.0, 2.2) -- ++(0, -1.4) node [black,midway,xshift=15pt,rotate=90,anchor=center] {ISR priorities};
+
+    \node[block, anchor=west](b1) at (S) {\textbf{Flow A}\linebreak Running};
+    \node[block, right=of b1](b2) {\textbf{Flow B}\linebreak Running};
+    \node[block, above right=1.0cm and 0.1cm of b2.east, anchor=west](b3) {\textbf{ISR A}\linebreak Running};
+    \node[block, below right=1.0cm and 0.1cm of b3.east, anchor=west](b4) {\textbf{Flow C}\linebreak Running};
+    \node[block, right=of b4](b5) {\textbf{Flow A}\linebreak Running};
+    \node[block, right=of b5](b6) {\textbf{Flow B}\linebreak Running};
+    \node[block, right=of b6](b7) {\textbf{Flow D}\linebreak Running};
+    \node[block, above right=2.0cm and 0.1cm of b7.east, anchor=west](b8) {\textbf{ISR D}\linebreak Running};
+    \node[block, below right=2.0cm and 0.1cm of b8.east, anchor=west](b9) {\textbf{Flow E}\linebreak Running};
+    \node[right=of b9, anchor=north west](end) {\normalsize \ldots};
+\end{tikzpicture}
