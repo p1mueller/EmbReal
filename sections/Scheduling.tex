@@ -81,50 +81,6 @@ This can be done
   \item dynamically (changing priority based on rules)
 \end{itemize}
 
-\subsection{Approaches to define static Priorities for Tasks}
-\subsubsection{Rate-Monotonic Approach: Short Code High priority}
-The idea is that short ISR/tasks are executed fast.
-Therefore, they block fo a very short time and execution is more guaranteed by priority.
-\begin{itemize}
-  \item Shortest ISR has highest priority
-  \item Shortest flow/task has highest priority
-\end{itemize}
-
-\subsubsection{Important Code High Priority}
-The idea is important ISR/tasks are executed fast.
-\begin{itemize}
-  \item Important ISR has highest priority
-  \item Important task has highest priority
-\end{itemize}
-
-\subsubsection{Blended Approach}
-Combination of RMA and ICH
-\begin{itemize}
-  \item Short task high priority
-  \item Important ISR has high priority
-\end{itemize}
-
-\subsection{Race condition/Starvation/Deadlock}
-\begin{description}
-  \item[Race Condition]  The result of an operation depends on the timing behaviour of a specific operation.
-  \item[Starvation]      Is a condition where a process never gets to it (it starves).
-        The fairness condition states that starvation must be prevented.
-  \item[Deadlock]        Is a situation where two processes block each other.
-        A deadlock can be avoided by having all processes request the shared resources always in the same order.
-\end{description}
-
-\subsubsection{Prevent Race Conditions}
-\begin{description}
-  \item[Critical Sections] Define sections in which ISR(s) are blocked.
-        Pro: Simple, possible on any MCU.
-        Cons: Acts blocking.
-  \item[Atomic Operations] Command disables ISR for one instruction cycle.
-        Atomic commands can not be split in instruction cycles that can be interrupted.
-        Atomic by CPU architecture see RISC-V RV32A Atomic Extension.
-        Atomic by programming language.
-        \textbf{Atomic operation} is a \textbf{foundation} for all other solutions of OS and RTOS.
-\end{description}
-
 \subsection{Scheduling Algorithms}
 
 \subsubsection{Sequential One Time Execution}
@@ -148,10 +104,10 @@ Combination of RMA and ICH
 \begin{paracol}{2}
   Cooperative task/flow execution: Every flow runs as long as it has code to execute.
   When the flow is done it returns to the schedule algorithm.
-  The schedule algorithm start next flow/task.\\
+  The schedule algorithm start next flow/task.\newline
   This works fine as long as the flows are none blocking and don’t last too long.
-  This leads typical to state machines!\\
-  \input{images/Schedule/flow_rr_no_isr}$ $\\
+  This leads typical to state machines!\newline
+  \input{images/Schedule/flow_rr_no_isr}
   \switchcolumn
   \lstinputlisting[style=C]{snippets/Schedule_Algorithms/round_robin_no_isr.c}
 \end{paracol}
@@ -283,6 +239,6 @@ The RTOS is interrupted by ISRs.
     Priority of ISR    & different, static, high                                & different, static, high                                \\
     Preemption         & ISR preempts RTOS, RTOS tasks preempt other RTOS tasks & ISR preempts RTOS, RTOS tasks preempt other RTOS tasks \\
     Deterministic      & by flow design                                         & by flow design                                         \\
-    Occurence          & often, if knowledge and MCU ressources are available   & often, if knowledge and MCU ressources are available   \\\hline
+    Occurence          & often, if knowledge and MCU resources are available    & often, if knowledge and MCU resources are available    \\\hline
   \end{tabularx}
 \end{sidewaystable}

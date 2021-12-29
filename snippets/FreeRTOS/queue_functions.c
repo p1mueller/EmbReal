@@ -1,0 +1,24 @@
+vQueueAddToRegistry();
+xQueueAddToSet();
+xQueueCreate();
+xQueueCreateSet();
+xQueueCreateStatic();
+vQueueDelete();
+pcQueueGetName();
+xQueuelsQueueEmptyFromlSR();
+xQueuelsQueueFullFromlSR();
+uxQueueMessagesWaiting();
+uxQueueMessagesWaitingFromlSR();
+xQueueOverwrite();
+xQueueOverwriteFromlSR();
+xQueuePeek();
+xQueuePeekFromlSR();
+xQueueReceive();
+xQueueReceiveFromlSR();
+xQueueRemoveFromSet();
+xQueueReset();
+xQueueSelectFromSet();
+xQueueSelectFromSetFromlSR();
+xQueueSend(), xQueueSendToFront(), xQueueSendToBack();
+xQueueSendFromlSR(), xQueueSendToBackFromlSR(), xQueueSendToFrontFromlSR();
+uxQueueSpacesAvailable()

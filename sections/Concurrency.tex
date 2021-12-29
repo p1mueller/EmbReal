@@ -1,10 +1,10 @@
 %!TEX root = ../EmbSW1.tex
 \section{Concurrency}
-
-\subsection{Motivation}
+\subsection{Introduction}
+\subsubsection{Motivation}
 Practical programs usually perform several jobs \glqq simultaneously\grqq.
 
-\subsection{Definitions}
+\subsubsection{Definitions}
 \begin{description}
   \item[Definition:] Concurrency refers to the ability of a system to process or execute processes independently of each other.
         (Concurrency $\rightarrow$ Tasks/Processes $\rightarrow$ Threads)
@@ -13,7 +13,7 @@ Practical programs usually perform several jobs \glqq simultaneously\grqq.
 \end{description}
 A key feature of embedded systems is the ubiquity of concurrency in applications.
 
-\subsection{Parallel vs. Concurrent Computing}
+\subsubsection{Parallel vs. Concurrent Computing}
 \begin{itemize}
   \item Parallel Computing
         \begin{itemize}
@@ -29,26 +29,26 @@ A key feature of embedded systems is the ubiquity of concurrency in applications
         \end{itemize}
 \end{itemize}
 
-\subsection{Reasons, to not use Concurrency}
+\subsubsection{Reasons to not use Concurrency}
 \begin{itemize}
-  \item \textbf{Concurrency (with processes, tasks, threads) always \glqq cost\grqq}:
+  \item \textbf{Concurrency (with Processes, Tasks, Threads) always cost}:
         \begin{itemize}
           \item Stack
           \item Context switch
                 \begin{itemize}
                   \item takes time
-                  \item old context must be saved, new one must be loaded again
+                  \item Old context needs to be stored, new context needs to be loaded
                 \end{itemize}
-          \item Access to shared ressources has to be syncronized
+          \item Access to shared resources needs to be synchronized
                 \begin{itemize}
                   \item costs
-                  \item prune to errors
+                  \item prone to errors (is forgotten or done wrong)
                 \end{itemize}
         \end{itemize}
   \item \textbf{Complexity increases}
         \begin{itemize}
-          \item Sequential programs are easier to understand then parallel ones
-          \item The target should be to design a system as simple as possible
+          \item Sequential progams are easier to understand than parallel ones.
+          \item The goal should always be to keep a system as simple as possible.
         \end{itemize}
 \end{itemize}
 
@@ -62,6 +62,206 @@ For most processor architectures, the processor usually completes the current in
   \item The interrupt may be preempted by other higher-priority interrupts anytime, including before the first ISR instruction is executed.
 \end{itemize}
 
+
+\subsection{Interprocess Communication (IPC)}
+In a multitasking system there may exist tasks that need to cooperate with each other by exchanging messages.
+This is called intertask communication, which can be classified into two types:
+\begin{description}
+  \item[Synchronous:] The sender and receiver need to wait for each other until the message transmission is complete.
+  \item[Asynchronous:] The sender may continue to execute its next instruction while the message is being delivered to the receiver.
+\end{description}
+Example of asynchronous intertask communication: message queues, pipes, sockets, and signaling.
+
+\subsubsection{Pipes}
+Pipes are simple message transfer mechanism.
+Mostly used for communication between two objects.
+\begin{itemize}
+  \item A pipe is a container of unstructured bytes.
+  \item A Pipe is a strictly FIFO buffer.
+  \item A pipe is a kernel object that can be a named pipe or an unnamed pipe
+\end{itemize}
+\glqq{}Pipes\grqq provide a task-to-task, task-to-interrupt, and interrupt-to-task communication mechanism.
+However, the features of Pipes depend on the technology used.
+
+\paragraph{Usage Patterns}
+\columnratio{0.6}
+\begin{paracol}{2}
+  \textbf{Unidirectional Communication:} Task A writes and task B reads from pipe.
+  The pipe delivers everything to manage the data flow (full, empty, data available).
+  \switchcolumn
+  \includegraphics[width=0.39\textwidth]{images/Concurrency/uni_pipe.png}
+  \switchcolumn
+  \textbf{Bidrectional Communication:} Two pipes are needed to realize this pattern.
+  \switchcolumn
+  \includegraphics[width=0.39\textwidth]{images/Concurrency/bi_pipe.png}
+\end{paracol}
+
+\subsubsection{Queues}
+Queues are an underlying mechanism beyond all tasks communication or synchronization in an operating system.
+They are an important subject to understand as it is unavoidable to be able to build a complex application with tasks cooperating with each other.
+They are a mean to store a and finite number (named \glqq{}length\grqq) of fixed size data.
+They are able to be read and written by several different tasks, and don't belong to any task in particular.
+A queue is normally a FIFO which means elements are read in the order they have been written.
+This behavior depends on the writing method: two writing functions can be used to write either at the beginning or at the end of this queue.
+\begin{itemize}
+  \item A message queue is a container of multiple messages, each of which can be manipulated by a task separately.
+  \item Each message in a message queue is associated with a priority; consequently, messages can be processed by tasks in priority order.
+  \item A message queue is a named kernel object, with a name uniquely defined in the kernel’s namespace.
+\end{itemize}
+\glqq{}Queues\grqq provide a task-to-task, task-to-interrupt, and interrupt-to-task communication mechanism.
+However, the features of Queues depend on the technology used (FreeRTOS supports less features).
+
+\paragraph{Usage Patterns}
+\columnratio{0.6}
+\begin{paracol}{2}
+  \textbf{Unidirectional Communication:} Task A writes and task B reads from queue.
+  The queue delivers everything to manage the data flow (full, empty, data available).
+  \switchcolumn
+  \includegraphics[width=0.39\textwidth]{images/Concurrency/uni_queue.png}
+  \switchcolumn
+  \textbf{Acknowledged Unidirectional Communication:}
+  Similar approach as unidirectional communication, except that there is a semaphore used to signal that data was successfully received.
+  Otherwise, a repetition can be triggered by task A.
+  \switchcolumn
+  \includegraphics[width=0.39\textwidth]{images/Concurrency/ack_queue.png}
+  \switchcolumn
+  \textbf{Bidrectional Communication:} Two queues are needed to realize this pattern.
+  \switchcolumn
+  \includegraphics[width=0.39\textwidth]{images/Concurrency/bi_queue.png}
+\end{paracol}
+
+
+\subsection{Resource Sharing}
+\subsubsection{Definitions}
+\begin{description}
+  \item[Race Condition]  The result of an operation depends on the timing behaviour of a specific operation.
+  \item[Starvation]      Is a condition where a process never gets to it (it starves).
+        The fairness condition states that starvation must be prevented.
+  \item[Deadlock]        Is a situation where two processes block each other.
+        A deadlock can be avoided by having all processes request the shared resources always in the same order.
+  \item[Shared Variable] If the variable is accessible by all process, then the access is easy to establish.
+        However race conditions can occur and data integrity is an issue.
+  \item[Shared Memory] An object (a regular file or memory object) can be directly mapped into the address space of one or more processes.
+        Memory mapping makes the mapped region of the object directly addressable by a process.
+        This eliminates unnecessary data read, write, or copy operations, and thus offers an efficient means of passing data between processes running on the same machine.
+        However shared memory is also a shared resource.
+        Therefore, Resource management mechanism must be used for usage of the shared memory.
+        Depending on the used technology (OS, language architecture) these mechanism are included in the shared memory object.
+  \item[Priority Inversion] POSIX-compliant RTOSs implement a priority-based preemptive scheduler, which ensures that among all the threads that are ready to run, the one with the highest priority is always the task that is actually running.
+        When a higher-priority thread is released, the scheduler will preempt the currently running thread in the middle of its execution.
+        However, priority-based preemptive scheduling could be compromised when tasks share exclusive resources that are protected by locks:
+        Requesting a resource locked by a lower-priority task would prevent a higher-priority ready task from running when it should.
+        This issue is called priority inversion, referring to the phenomenon where a higher-priority task must wait for the lower-priority task.
+        Priority inversion is a critical issue because it may lead to the missing of task deadlines.
+\end{description}
+Shared memory support:
+\begin{description}
+  \item[Linux, Mac, Windows:] Support shared memory in the IDEs
+  \item[OpenMP:] Software library for C and C++ delivers also support for shared memory
+  \item[FreeRTOS:] No explicit support of shared memory
+  \item[CMSIS RTOS2:] Example to implement a shared memory: \href{https://arm-software.github.io/CMSIS_5/RTOS2/html/rtos_api2.html}{MemoryPool}
+\end{description}
+
+\subsubsection{Prevention}
+\paragraph{Race Conditions}
+\begin{description}
+  \item[Critical Sections] Define sections in which ISR(s) are blocked.
+        Pro: Simple, possible on any MCU.
+        Cons: Acts blocking.
+  \item[Atomic Operations] Command disables ISR for one instruction cycle.
+        Atomic commands can not be split in instruction cycles that can be interrupted.
+        Atomic by CPU architecture see RISC-V RV32A Atomic Extension.
+        Atomic by programming language.
+        \textbf{Atomic operation} is a \textbf{foundation} for all other solutions of OS and RTOS.
+\end{description}
+
+\paragraph{Deadlock}
+\begin{enumerate}
+  \item fixed sequence for all task on locking and unlocking the same resources.
+        Example: task A and B both first lock resource 1 and then resource 2
+  \item Try with return.
+        Example tas A and B try to lock resource 2.
+        If resource 2 is already locked, then the tasks release resource 1
+  \item Timed release.
+        Example: task A and B try to lock resource 2.
+        If resource 2 is not available after a defined time, then the task releases resource 1 again.
+  \item Atomic or Critical Section
+        Example: taskk A and B lock resource 1 and resource 2 in an atomic manner or a critical section defined sequence.
+\end{enumerate}
+
+\paragraph{Priority Inversion}
+\begin{description}
+  \item[Priority inheritance Protocol (PIP):] When a low priority task is holding a resource and a higher priority task wants it.
+        Then the priority is inherited from the higher priority tas to the lower one.
+        Inheritance is also possible over several tasks, where the highest priority is inherited.
+  \item[Highest Locker Protocol (HLP):] When a task takes a resource then its priority is dynamically set to the highest priority of the task pool which can take the resource.
+        (also kwnown as immediate priority inheritance, immediate ceiling priority or priority protect protocol)
+  \item[Priority Ceiling Protocol (PCP):] Combines PIP and HLP.
+        When a low priority task is holding a resource and a higher priority task wants it then the priority is inherited from the highest priority of the task pool which can take the resource.
+\end{description}
+
+\subsubsection{Semaphores}
+A semaphore an be used in various ways
+\begin{itemize}
+  \item Task synchronization (binary)
+  \item Task ISR synchronization (binary)
+  \item Counting events (counting)
+  \item Flow control (share memory \& binary/counting)
+  \item Resource management (binary/counting)
+\end{itemize}
+
+\paragraph{Binary Semaphore}
+Binary semaphores are the simplest effective way to synchronize tasks, an other even more simple, but not as effective, consists in polling an input or a resource.
+A binary semaphore can be seen as a queue which contains only one element.
+
+\includegraphics[width=\textwidth]{images/Concurrency/binary_semaphore.png}
+
+\paragraph{Counting Semaphore}
+A counting semaphore is a semaphore that can be taken several (but limited) times before it becomes unavailable.
+It maintains a value which is increased as the semaphore is given, and decreased when it is taken.
+Is is comparable to a queue with a certain amount of elements.
+When created, a counting semaphore can be initialized to be available an arbitrary number of times.
+The initial value and the maximum are defined on semaphore creation!
+
+\includegraphics[width=\textwidth]{images/Concurrency/counting_semaphore.png}
+
+\paragraph{Recommandations}
+\begin{enumerate}
+  \item Lock and release of Resources with semaphores costs time $\leftarrow$ less semaphores but bigger blocking regions
+  \item If more tasks access semaphores, then blocking time gets longer.
+        More semaphores smaller blocking regions
+  \item Approach 1 and 2 are counter rotating.
+        Case-specific decision, partly experimental
+\end{enumerate}
+In principle, it is important to create minimum locking times in order to avoid unnecessary blocking time.
+
+\subsubsection{Mutexes}
+A mutex (= mutual exclusion) is used similarly to a binary semaphore, except the task which take the semaphore must give it back.
+This can be though with a token associated with the resource to access to.
+A task holds the token, works with the resource then gives back the token; in the meanwhile, no other token can be given to the mutex.
+Mutexes are mostly implemented blocking.
+
+\includegraphics[width=\textwidth]{images/Concurrency/mutex.png}
+
+\subsubsection{Recursive Mutex}
+The issue arises when a task several times locks the mutex.
+Consequently, it will also several time unlock the mutex.
+If locking can only be done once all following locks are not counted.
+If a unlock command arises the the mutex is released even if a task logic has locked it for it.
+
+Solution:
+Every lock of the mutex is counted and must be unlocked to release the mutex.
+A recursive Mutex is a counting Mutex!
+
+
+\subsection{Function Reentrancy}
+In an RTOS the function should be thread safe:
+A function is \glqq{}reentrant\grqq{} or thread safe if it is safe to call the function from more than one task, or from both tasks and interrupts.
+Reentrant functions are said to be \glqq{}thread safe\grqq{} because they can be accessed from more than one thread of execution without the risk of data or logical operations becoming corrupted.
+Each task maintains its own stack and its own set of processor (hardware) register values.
+If a function does not access any data other than data stored on the stack or held in a register, then the function is reentrant, and thread safe.
+
+That's also a reason why there are different implementations of functions for ISR and tasks.
 % \textbf{Folgerung:} Concurrency nur dann einsetzen, wenn wirklich ein Nutzen vorhanden ist!\\
 % Tendenziell werden speziell bei Verwendung eines RTOS zu viele Threads definiert, welche das System nur komplexer und komplizierter machen $\rightarrow$ \textbf{Sequential} is simple, \textbf{concurrent} is error-prone
 
