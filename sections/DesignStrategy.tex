@@ -33,6 +33,23 @@ Approach in a real time embedded design for task and scheduling topics
 	\item Theoretical and/or empirical performance evaluation of the scheduling algorithm and/or the schedule ability test
 \end{enumerate}
 
+\subsubsection{Enhanced with Multicore}
+Real-time scheduling analysis usually focuses on three components that build on one another:
+\begin{enumerate}
+	\item Define the work to be done
+	\item The system and task model / Manually determine concurrency
+	\item Software architecture considering the parallelism
+	      \begin{enumerate}
+		      \item Add some additional data required to make concurrency easier
+		      \item Organize into an algorithm
+		      \item Determine the partitioning
+		      \item Determine the communication model
+		      \item Map the processing to the cores of the processor
+	      \end{enumerate}
+	\item The scheduling algorithm with related schedule ability test. Implement every flow and measure WCET.
+	\item Theoretical and/or empirical performance evaluation of the scheduling algorithm and/or the schedule ability test
+\end{enumerate}
+
 \subsubsection{Split Work up into Tasks}
 Get the system's timing constraints from \ldots
 \begin{itemize}[label=\ldots]
@@ -112,3 +129,57 @@ The real time system architecture can be influenced by defining the priority of 
 \includegraphics[width=\textwidth]{images/DesignStrategy/prio_interrupts.png}
 \includegraphics[width=\textwidth]{images/DesignStrategy/prio_interrupts_rtos_handling.png}
 \includegraphics[width=\textwidth]{images/DesignStrategy/prio_interrupts_rtos_background.png}
+
+\subsection{Assessment}
+During the design approach the folowing assessment can be done accordingly to the following slides.
+However, the following process should e cared out in phase 1, 2 and 3!
+\begin{description}
+	\item[Jitter Time] The temporal jitter $T_\text{jitter}$ specifies the time with which the start of the reaction routine is allowed to fluctuate.
+	      Reasons for this can be time-synchronous activities, for which only small deviations are acceptable.
+	      If the acceptable jitter time is below approx. 100 instruction execution times, it can be assumed with certainty that the requirement is in a critical range for processors.
+	      The uncritical limit above which the processor can be expected to behave in a guaranteed manner can be expected, is of course individually dependent on the system.
+	      In any case, the system is designed to be safe if the permitted jitter is greater than the sum of all higher-priority events (taking into account the frequency of occurrence).
+	      For event-controlled systems if the jitter is greater than the sum of the cycle time for time-controlled systems
+	\item[Service Time] The service time $T_\text{service}$ plays a seemingly unimportant role, since it has to be scheduled anyway.
+	      However, for service times that take up more than 30\% of the total time (in the normal case or worst case), one must assume that this time is very dominant and strongly influences the other parts of the
+	      systems strongly. However, this 30\% limit is fuzzy, while service times < 1\% certainly have no influence.
+	\item[Reaction Time (WCET)] The maximum required reaction time $T_\text{reaction}$ is made up of the latency time and the service time.
+	      However possible interruptions must also be considered and taken into account.
+	      It becomes critical for the reaction time when it is about < 100 Instruction cycles (the limit is again	individual).
+	      The uncritical limit is again reached at the sum of all reaction times or the cycle time.
+\end{description}
+
+\subsubsection{Interaction of the Criteria}
+Even if the Reaction Time is the sum of Jitter and Service time the single criterie mus also be met to get a feasable embedded real time system. See table \ref{tab:crit_times}.
+
+Adjusting screws on the system:
+Requirements, chosen System, CPU frequency $\rightarrow$ instruction cycles, Ssoftware design $\rightarrow$ $T_{service}$\%
+
+\begin{table}[h]
+	\caption{Criteria for uncritial/critical timings}
+	\label{tab:crit_times}
+	\begin{tabularx}{\textwidth}{l X X}\hline
+		Requirement         & Rate as Critical                     & Rate as Uncritical                                                                                      \\\hline
+		$T_\text{jitter}$   & $< 100\times$ instruction cycles     & > Sum of all higher prioritised reaction times\newline OR\newline > Cycle time (time-controlled system) \\
+		$T_\text{service}$  & $> 30\%$ of the total computing time & $<1\%$ of the total computing time                                                                      \\
+		$T_\text{reaction}$ & $< 100\times$ instruction cycles     & > Sum of all higher prioritised reaction times\newline OR\newline > Cycle time (time-controlled system) \\\hline
+	\end{tabularx}
+\end{table}
+
+\paragraph{Example for 100\;MHz Instruction Time}
+For this example a microcontroller with 100\;MHz RISC architecture is assumed.
+(consequently every 10ns (0.00001ms) an instruction is executed).
+The Boundary is therefore 0.001ms.
+A Simple Model would use constant latency times.
+More complex would it be with variable latency depending on system complexity.
+The Microcontroller can achieve faster reaction time when the task is implemented purely in ISR.
+This diagram is not sharp and must be interpreted according to the system and project requirements.
+But it gives a impression.
+
+\includegraphics[width=0.8\textwidth]{images/DesignStrategy/100mhz_example.png}
+
+The decision tree is true for the 100\;MHz example.
+It gives a specific idea where the limitations of an embedded real time system, based on MCUs, lie.
+Depending on the system there can be more sophisticated solutions possible.
+
+\includegraphics[width=0.6\textwidth]{images/DesignStrategy/decision_tree.png}

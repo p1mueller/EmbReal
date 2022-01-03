@@ -47,6 +47,39 @@ An embedded real time system can be evaluated in three aspects:
         Idle state needs energy whiteout sleep modes.
 \end{description}
 
+\subsection{Special Requirements}
+\begin{itemize}
+  \item Reactive functionality
+        \begin{itemize}
+          \item An embedded-system has to react on external events
+          \item Many events can happen at the same time
+        \end{itemize}
+  \item Hard Real-time requirements
+        \begin{itemize}
+          \item Has to react within a defined time
+          \item Otherwise it is unusable or it can even cause harm
+        \end{itemize}
+  \item Reliability
+        \begin{itemize}
+          \item May be safety critical
+          \item Softwaren-updates expensive
+          \item Faults can cause material damage
+        \end{itemize}
+  \item Economic efficiency
+        \begin{itemize}
+          \item High number of units
+          \item Power consumption
+          \item Battery size
+          \item Unit cost
+        \end{itemize}
+  \item Extreme environmental conditions
+        \begin{itemize}
+          \item Electromagnetic Compatibility (EMC), temperature, …
+        \end{itemize}
+  \item Product lines
+  \item Testability
+\end{itemize}
+
 
 \subsection{Technology Overview}
 The hardware is like a foundation of the system.
