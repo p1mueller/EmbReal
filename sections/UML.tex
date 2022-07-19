@@ -131,6 +131,7 @@ Technical processes may be visualized in state diagrams.
               \item a logical state corresponds to a state class
               \item by state of a technical process we mean its logical state
           \end{itemize}
+    \item[Initial State] When the object is created, it enters the initial state and immediately takes the default transition
     \item[State Transition] State transitions in technical processes are triggered due to physical laws.
     \item[Event] Events are a consequence of a relevant state change of a technical process.
     \item[Attributes of Events] Events may hold attributes. Attributes may be any kind of additional information such as measureable quantities.
@@ -143,3 +144,14 @@ Technical processes may be visualized in state diagrams.
     \item[Attributes of Actions] Actions may contain attributes
 \end{description}
 \includegraphics[width=0.35\textwidth]{images/UML/statechart.png}
+
+\subsubsection{Advanced Features}
+\begin{description}
+    \item[Time-Events] Notation: after(100ms) (UML) or tm(timeUnits) (Rhapsody, where time units in ms)
+    \item[Operation Calls in Actions] Operation calls can be part of an action.
+          Operations are executed during transition.
+          CIRO pulses are sent during state changes
+    \item[Entry and Exit Actions] Actions executed on entry or exit of a state.
+          Notation: Function call in body of state.
+    \item[Internal Transitions]
+\end{description}
